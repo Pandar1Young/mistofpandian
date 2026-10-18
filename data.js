@@ -1,6 +1,6 @@
 window.RESEARCH_DATA = {
   "site": "mistofpandian",
-  "generatedAt": "2026-10-18T21:18:15.973069+09:00",
+  "generatedAt": "2026-10-18T21:51:28.169363+09:00",
   "studies": [
     {
       "id": "20261018_183913_541992",

@@ -1,4 +1,4 @@
-/* Hits provides approximate public PV. GA4 loads only after explicit consent.
+/* Hits provides approximate public PV. GA4 defaults on, with persistent opt-out.
    Only fixed page/report identifiers are sent; URL queries and trade data are excluded. */
 'use strict';
 (() => {
@@ -7,9 +7,10 @@
   const COUNTER = 'https://hits.sh/pandar1young.github.io/mistofpandian';
   const PRIVACY_KEY = 'mistofpandian-analytics-optout';
   const GA_ID = 'G-H4WSCL56LF';
-  const GA_CONSENT_KEY = 'mistofpandian-ga-consent';
-  let gaConsent = null, gaStarted = false, gaLastPage = null;
-  try { gaConsent = localStorage.getItem(GA_CONSENT_KEY); } catch (_) { /* Ask again next visit. */ }
+  // Keep the legacy key so earlier explicit refusals remain effective.
+  const GA_PREFERENCE_KEY = 'mistofpandian-ga-consent';
+  let gaPreference = 'granted', gaStarted = false, gaLastPage = null;
+  try { gaPreference = localStorage.getItem(GA_PREFERENCE_KEY) === 'denied' ? 'denied' : 'granted'; } catch (_) { /* In-memory preference only. */ }
   const ROUTES = new Set(['overview', 'reports', 'compare', 'data', 'methodology']);
   const REPORT_ID = /^\d{8}_\d{6}_\d{6}-s(?:20|30)$/;
   const live = location.origin === ORIGIN && location.pathname.startsWith(PREFIX);
@@ -43,27 +44,19 @@
   gaToggle.type = 'button'; gaToggle.className = 'analytics-toggle';
   gaControls.append(gaStatus, gaToggle);
   if (footer) footer.append(gaControls);
-  const notice = document.createElement('section');
-  notice.className = 'analytics-consent';
-  notice.setAttribute('aria-label', 'Google Analytics 隐私选择');
-  const explanation = document.createElement('p');
-  explanation.textContent = '是否允许 Google Analytics 使用 Cookie 统计大致地区、访问来源、设备与页面浏览？拒绝不影响使用本站；原有无 Cookie 的公开访问计数可在页脚单独关闭。';
+  const disclosure = document.createElement('span');
+  disclosure.className = 'ga-disclosure';
+  disclosure.textContent = 'Google Analytics 默认使用 Cookie 统计大致地区、来源、设备与页面浏览，可随时关闭。';
   const privacy = document.createElement('a');
   privacy.href = 'https://policies.google.com/privacy?hl=zh-CN';
   privacy.target = '_blank'; privacy.rel = 'noopener noreferrer'; privacy.textContent = 'Google 隐私政策';
-  const accept = document.createElement('button');
-  accept.type = 'button'; accept.textContent = '允许 Google 统计';
-  const decline = document.createElement('button');
-  decline.type = 'button'; decline.textContent = '拒绝 Google 统计';
-  notice.append(explanation, privacy, accept, decline);
-  if (footer) footer.append(notice);
-  function gaEnabled() { return enabled() && gaConsent === 'granted' && pageKey() !== null; }
+  gaControls.append(disclosure, privacy);
+  function gaEnabled() { return enabled() && gaPreference === 'granted' && pageKey() !== null; }
   function gaRefresh() {
     const available = live && !privacySignal && !optedOut && pageKey() !== null;
-    notice.hidden = !available || gaConsent === 'granted' || gaConsent === 'denied';
     gaToggle.disabled = !available;
-    gaToggle.textContent = gaConsent === 'granted' ? '撤回 Google 统计同意' : '允许 Google 统计';
-    gaStatus.textContent = !available ? 'Google 统计已停用' : gaConsent === 'granted' ? 'Google 统计已允许 · 使用 Cookie' : 'Google 统计未启用';
+    gaToggle.textContent = gaPreference === 'granted' ? '关闭 Google 统计' : '开启 Google 统计';
+    gaStatus.textContent = !available ? 'Google 统计已停用' : gaPreference === 'granted' ? 'Google 统计已开启 · 使用 Cookie' : 'Google 统计已关闭';
     if (!preferenceSaved) gaStatus.textContent += '（偏好无法保存，仅本页有效）';
   }
   function gaCommand() { window.dataLayer.push(arguments); }
@@ -85,6 +78,7 @@
       gaStarted = true;
       window.dataLayer = window.dataLayer || [];
       window.gtag = gaCommand;
+      // Owner-selected storage mode, not a record of visitor consent.
       gaCommand('consent', 'default', {analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied'});
       gaCommand('js', new Date());
       const script = document.createElement('script');
@@ -117,14 +111,12 @@
     }
   }
   function chooseGA(value) {
-    gaConsent = value;
-    try { localStorage.setItem(GA_CONSENT_KEY, value); preferenceSaved = true; } catch (_) { preferenceSaved = false; }
+    gaPreference = value;
+    try { localStorage.setItem(GA_PREFERENCE_KEY, value); preferenceSaved = true; } catch (_) { preferenceSaved = false; }
     if (value !== 'granted') gaStop();
     gaRefresh(); gaPageView();
   }
-  accept.addEventListener('click', () => chooseGA('granted'));
-  decline.addEventListener('click', () => chooseGA('denied'));
-  gaToggle.addEventListener('click', () => chooseGA(gaConsent === 'granted' ? 'denied' : 'granted'));
+  gaToggle.addEventListener('click', () => chooseGA(gaPreference === 'granted' ? 'denied' : 'granted'));
   function enabled() { return live && !privacySignal && !optedOut; }
   function refresh() {
     toggle.disabled = !live || privacySignal;
@@ -182,10 +174,10 @@
   });
   window.addEventListener('hashchange', () => { pageView(); gaRefresh(); gaPageView(); });
   window.addEventListener('storage', event => {
-    if (event.key !== PRIVACY_KEY && event.key !== GA_CONSENT_KEY && event.key !== null) return;
+    if (event.key !== PRIVACY_KEY && event.key !== GA_PREFERENCE_KEY && event.key !== null) return;
     try {
       optedOut = localStorage.getItem(PRIVACY_KEY) === '1';
-      gaConsent = localStorage.getItem(GA_CONSENT_KEY);
+      gaPreference = localStorage.getItem(GA_PREFERENCE_KEY) === 'denied' ? 'denied' : 'granted';
     } catch (_) { return; }
     if (!gaEnabled()) gaStop();
     if (optedOut) { badge.removeAttribute('src'); lastPage = null; }
