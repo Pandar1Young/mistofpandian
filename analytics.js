@@ -87,12 +87,6 @@
       window.gtag = gaCommand;
       gaCommand('consent', 'default', {analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied'});
       gaCommand('js', new Date());
-      gaCommand('config', GA_ID, {
-        ...gaFields(page), send_page_view: false,
-        allow_google_signals: false, allow_ad_personalization_signals: false,
-        cookie_flags: 'SameSite=Lax;Secure', cookie_path: PREFIX,
-        cookie_domain: 'pandar1young.github.io'
-      });
       const script = document.createElement('script');
       script.async = true;
       script.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
@@ -101,6 +95,12 @@
     }
     if (page === gaLastPage) return;
     gaLastPage = page;
+    gaCommand('config', GA_ID, {
+      ...gaFields(page), send_page_view: false,
+      allow_google_signals: false, allow_ad_personalization_signals: false,
+      cookie_flags: 'SameSite=Lax;Secure', cookie_path: PREFIX,
+      cookie_domain: 'pandar1young.github.io'
+    });
     gaCommand('set', gaFields(page));
     gaCommand('event', 'page_view', {...gaFields(page), send_to: GA_ID});
   }
@@ -177,7 +177,7 @@
     const id = trigger && trigger.dataset.openReport;
     if (id && REPORT_ID.test(id)) {
       increment('/events/report-open-' + id);
-      if (gaEnabled()) gaCommand('event', 'report_open', {report_id: id, send_to: GA_ID});
+      if (gaEnabled()) gaCommand('event', 'report_open', {...gaFields(pageKey()), report_id: id, send_to: GA_ID});
     }
   });
   window.addEventListener('hashchange', () => { pageView(); gaRefresh(); gaPageView(); });
