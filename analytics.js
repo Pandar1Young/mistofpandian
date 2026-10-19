@@ -11,7 +11,7 @@
   const GA_ID = 'G-H4WSCL56LF';
   const IP_ENDPOINTS = ['https://api.ipify.org?format=json', 'https://api64.ipify.org?format=json'];
   const ROUTES = new Set(['overview', 'tuning', 'reports', 'compare', 'data', 'methodology']);
-  const REPORT_ID = /^\d{8}_\d{6}_\d{6}-(?:s(?:20|30)|(?:train|validation)_H[14]_p(?:8|12|20)_m(?:3|6|9)_s(?:20|30)|baseline_(?:M15|H1|H4)_s(?:30|60))$/;
+  const REPORT_ID = /^\d{8}_\d{6}_\d{6}-(?:s(?:20|30)|(?:train|validation)_H[14]_p(?:8|12|20)_m(?:3|6|9)_s(?:20|30)|baseline_(?:M15|H1|H4)_s(?:30|60)|(?:train|validation)_H[14]_(?:base|k30|k70|fast|slow|tight|wide|trailfast|trailslow)_s(?:30|60))$/;
   const live = location.origin === ORIGIN && location.pathname.startsWith(PREFIX);
   const privacySignal = navigator.globalPrivacyControl === true ||
     navigator.doNotTrack === '1' || navigator.doNotTrack === 'yes' || window.doNotTrack === '1';

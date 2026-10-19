@@ -24,9 +24,11 @@
           "description": "",
           "type": "number",
           "values": [
-            "50"
+            "30",
+            "50",
+            "70"
           ],
-          "varying": false
+          "varying": true
         },
         {
           "key": "InpEMA10",
@@ -35,9 +37,11 @@
           "description": "",
           "type": "number",
           "values": [
-            "10"
+            "5",
+            "10",
+            "20"
           ],
-          "varying": false
+          "varying": true
         },
         {
           "key": "InpEMA200",
@@ -46,9 +50,11 @@
           "description": "",
           "type": "number",
           "values": [
-            "200"
+            "150",
+            "200",
+            "250"
           ],
-          "varying": false
+          "varying": true
         },
         {
           "key": "TradingSettings",
@@ -76,23 +82,27 @@
           "key": "InpSL_Pips",
           "label": "止损输入",
           "unit": "",
-          "description": "原 EA 的距离输入；本轮取值 500，实际解释由源码与报价精度决定，不与点差混用。",
+          "description": "原 EA 的距离输入；按当前报告取值，实际价格距离由源码与报价精度决定，不与点差混用。本研究为2位报价，500对应价格距离5.00 USD。",
           "type": "number",
           "values": [
-            "500"
+            "300",
+            "500",
+            "800"
           ],
-          "varying": false
+          "varying": true
         },
         {
           "key": "InpTP_Pips",
           "label": "止盈输入",
           "unit": "",
-          "description": "原 EA 的距离输入，本轮取值 500，使用正值避开 TP=0 边界问题。",
+          "description": "原 EA 的距离输入，按当前报告取值；使用正值避开 TP=0 边界问题。",
           "type": "number",
           "values": [
-            "500"
+            "500",
+            "600",
+            "1200"
           ],
-          "varying": false
+          "varying": true
         },
         {
           "key": "Inpuser_SLippage",
@@ -134,9 +144,11 @@
           "description": "",
           "type": "number",
           "values": [
-            "300"
+            "200",
+            "300",
+            "500"
           ],
-          "varying": false
+          "varying": true
         },
         {
           "key": "InpTrailingStop",
@@ -145,9 +157,11 @@
           "description": "",
           "type": "number",
           "values": [
-            "300"
+            "200",
+            "300",
+            "500"
           ],
-          "varying": false
+          "varying": true
         },
         {
           "key": "InpTrailingStep",
@@ -156,9 +170,10 @@
           "description": "",
           "type": "number",
           "values": [
+            "50",
             "100"
           ],
-          "varying": false
+          "varying": true
         },
         {
           "key": "TimeSettings",
