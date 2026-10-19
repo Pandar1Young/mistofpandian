@@ -11,8 +11,8 @@
   const GA_PREFERENCE_KEY = 'mistofpandian-ga-consent';
   let gaPreference = 'granted', gaStarted = false, gaLastPage = null;
   try { gaPreference = localStorage.getItem(GA_PREFERENCE_KEY) === 'denied' ? 'denied' : 'granted'; } catch (_) { /* In-memory preference only. */ }
-  const ROUTES = new Set(['overview', 'reports', 'compare', 'data', 'methodology']);
-  const REPORT_ID = /^\d{8}_\d{6}_\d{6}-s(?:20|30)$/;
+  const ROUTES = new Set(['overview', 'tuning', 'reports', 'compare', 'data', 'methodology']);
+  const REPORT_ID = /^\d{8}_\d{6}_\d{6}-(?:s(?:20|30)|(?:train|validation)_H[14]_p(?:8|12|20)_m(?:3|6|9)_s(?:20|30))$/;
   const live = location.origin === ORIGIN && location.pathname.startsWith(PREFIX);
   const privacySignal = navigator.globalPrivacyControl === true ||
     navigator.doNotTrack === '1' || navigator.doNotTrack === 'yes' || window.doNotTrack === '1';
