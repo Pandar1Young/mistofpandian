@@ -25,7 +25,7 @@
   const polarity = n => Number(n) >= 0 ? 'positive' : 'negative';
   const DATA = window.RESEARCH_DATA;
   const titles = {overview:'研究总览',tuning:'时间平移调参',reports:'回测报告',compare:'实验对照',data:'数据档案',methodology:'方法与边界'};
-  const state = {route:'overview',selected:null,chartMode:'balance',query:'',symbol:'all',spread:'all',study:null,dialog:null,tab:'trades',direction:'all',tradeQuery:'',page:1,tuningPhase:'validation',tuningTimeframe:'all',tuningSort:'net'};
+  const state = {route:'overview',selected:null,chartMode:'balance',query:'',filters:{},study:null,dialog:null,tab:'trades',direction:'all',tradeQuery:'',page:1,tuningPhase:'validation',tuningTimeframe:'all',tuningSort:'net'};
   let toastTimer;
   function notify(message) {
     $('toast').textContent = message;
@@ -64,6 +64,11 @@
   });
   if (!DATA || !Array.isArray(DATA.reports) || !DATA.reports.length) {
     $('main').innerHTML = '<section class="load-error"><p class="eyebrow">RESEARCH ARCHIVE</p><h1>研究数据尚未加载</h1><p>请通过 build_mistofpandian.py 构建网站，并打开生成目录中的 index.html。</p></section>';
+    return;
+  }
+  const FILTERS = window.ResearchFilters;
+  if (!FILTERS || DATA.metadata?.schemaVersion !== 1) {
+    $('main').innerHTML = '<section class="load-error"><h1>筛选元数据尚未加载</h1><p>请刷新网页，或使用最新构建器重新生成网站。</p></section>';
     return;
   }
   const reports = [...DATA.reports].sort((a,b) => b.createdAt.localeCompare(a.createdAt) || a.spread-b.spread);
@@ -128,14 +133,32 @@
   }
   function reportCard(report) {
     const s = report.summary, range = period(report);
-    return `<article class="panel report-card"><div class="report-card-top"><span class="report-icon">${icon('document')}</span>${verified}</div><h2>${esc(reportLabel(report))}</h2><p class="description">${esc(report.strategy)} · ${esc(range.from)} — ${esc(range.to)}</p><dl class="report-card-metrics"><div><dt>净利润 / USD</dt><dd class="${polarity(s.net_profit)}">${signed(s.net_profit)}</dd></div><div><dt>报告最大回撤</dt><dd>${esc(drawdown(report).percent)}%</dd></div><div><dt>已完成交易</dt><dd>${esc(s.total_trades)}<small class="currency">笔</small></dd></div></dl><svg class="mini-chart" viewBox="0 0 400 75" data-sparkline="${esc(report.id)}" role="img" aria-label="${esc(report.symbol)} 点差 ${report.spread} 已平仓余额简图"></svg><div class="card-bottom"><span>固定点差 · 离线环境 · USD</span><button class="text-button" data-open-report="${esc(report.id)}">打开报告 <span>↗</span></button></div></article>`;
+    const parameterTags = FILTERS.fields(DATA.metadata, {'d-eaId':report.eaId}).filter(f=>f.kind==='parameter'&&f.varying&&Object.hasOwn(report.parameters,f.key)).map(f=>`<span class="tag">${esc(f.label)} ${esc(report.parameters[f.key])}${f.unit?` ${esc(f.unit)}`:''}</span>`).join('');
+    return `<article class="panel report-card"><div class="report-card-top"><span class="report-icon">${icon('document')}</span>${verified}</div><h2>${esc(reportLabel(report))}</h2><p class="description">${esc(report.strategy)} · ${esc(range.from)} — ${esc(range.to)}</p><div class="report-meta parameter-tags"><span class="tag">${esc(report.timeframe)}</span>${parameterTags}</div><dl class="report-card-metrics"><div><dt>净利润 / USD</dt><dd class="${polarity(s.net_profit)}">${signed(s.net_profit)}</dd></div><div><dt>报告最大回撤</dt><dd>${esc(drawdown(report).percent)}%</dd></div><div><dt>已完成交易</dt><dd>${esc(s.total_trades)}<small class="currency">笔</small></dd></div></dl><svg class="mini-chart" viewBox="0 0 400 75" data-sparkline="${esc(report.id)}" role="img" aria-label="${esc(report.symbol)} 点差 ${report.spread} 已平仓余额简图"></svg><div class="card-bottom"><span>固定点差 · 离线环境 · USD</span><button class="text-button" data-open-report="${esc(report.id)}">打开报告 <span>↗</span></button></div></article>`;
   }
   function filteredReports() {
-    const query = state.query.toLowerCase().trim();
-    return reports.filter(report => (state.symbol==='all'||report.symbol===state.symbol) && (state.spread==='all'||String(report.spread)===state.spread) && (!query||[report.title,report.strategy,report.symbol,report.timeframe,report.createdAt,report.summary.inputs,report.phase==='training'?'训练':report.phase==='validation'?'后续检验':'点差对照','点差 '+report.spread].join(' ').toLowerCase().includes(query)));
+    return FILTERS.filter(reports, DATA.metadata, state.filters, state.query);
+  }
+  function facetControl(field) {
+    const current = state.filters[field.id] || '';
+    return `<label class="facet-control" for="filter-${esc(field.id)}"><span>${esc(field.label)}${field.unit?` <small>(${esc(field.unit)})</small>`:''}</span>${field.kind==='parameter'?`<code>${esc(field.key)}</code>`:''}<select id="filter-${esc(field.id)}" data-report-filter="${esc(field.id)}" ${field.description?`aria-describedby="help-${esc(field.id)}"`:''}><option value="">${esc(field.allLabel)}</option>${field.options.map(option=>`<option value="${esc(option.value)}" ${current===option.value?'selected':''} ${!option.count&&current!==option.value?'disabled':''}>${esc(option.label)} · ${option.count} 份</option>`).join('')}</select>${field.description?`<small class="facet-help" id="help-${esc(field.id)}">${esc(field.description)}</small>`:''}</label>`;
+  }
+  function reportFacetFields(fixedOpen=false) {
+    const fields = FILTERS.facets(reports, DATA.metadata, state.filters, state.query);
+    const dimensions = fields.filter(f=>f.kind==='dimension');
+    const varying = fields.filter(f=>f.kind==='parameter'&&f.varying);
+    const fixed = fields.filter(f=>f.kind==='parameter'&&!f.varying);
+    return `<div class="facet-heading"><h2>回测条件</h2><span>各条件取交集 · 选项数字为匹配报告数</span></div><div class="facet-grid">${dimensions.map(facetControl).join('')}</div><div class="facet-heading"><h2>EA 输入参数</h2><span>从已核验报告自动读取</span></div>${varying.length?`<div class="facet-grid parameter-grid">${varying.map(facetControl).join('')}</div>`:'<p class="metadata-note">当前 EA 的输入参数没有不同取值，可展开下方查看。</p>'}${fixed.length?`<details id="fixedParameters" class="fixed-parameters" ${fixedOpen?'open':''}><summary>更多参数 · 当前各 EA 内仅一个已收录取值（${fixed.length} 项）${fixed.some(f=>state.filters[f.id])?' · 已有筛选':''}</summary><div class="facet-grid parameter-grid">${fixed.map(facetControl).join('')}</div></details>`:''}`;
   }
   function reportFilters() {
-    return `<div class="filter-bar"><label class="search-box">${icon('search')}<span class="screen-reader">搜索报告</span><input id="reportSearch" type="search" placeholder="搜索策略、品种或报告…" value="${esc(state.query)}" autocomplete="off"></label><label><span class="screen-reader">筛选交易品种</span><select id="symbolFilter"><option value="all">全部品种</option>${[...new Set(reports.map(r=>r.symbol))].map(symbol=>`<option ${state.symbol===symbol?'selected':''}>${esc(symbol)}</option>`).join('')}</select></label><label><span class="screen-reader">筛选固定点差</span><select id="spreadFilter"><option value="all">全部点差</option>${[...new Set(reports.map(r=>r.spread))].sort((a,b)=>a-b).map(spread=>`<option value="${spread}" ${state.spread===String(spread)?'selected':''}>点差 ${spread}</option>`).join('')}</select></label><span class="filter-count" id="reportCount"></span></div>`;
+    return `<section class="panel report-filters" aria-label="回测报告筛选"><div class="report-filter-toolbar"><label class="search-box">${icon('search')}<span class="screen-reader">搜索报告</span><input id="reportSearch" type="search" placeholder="搜索策略、品种、参数或报告…" value="${esc(state.query)}" autocomplete="off"></label><button class="button" data-action="reset-filters">清空筛选</button><span class="filter-count" id="reportCount" role="status" aria-live="polite"></span></div><div id="reportFilterFields">${reportFacetFields()}</div><p class="metadata-note">${esc(DATA.metadata.note)} 时间间隔为 K 线周期；平移量以根 K 线计，点差以 points 计。<a href="data/metadata.json" target="_blank" rel="noopener">查看元数据 JSON ↗</a></p></section>`;
+  }
+  function refreshReportFilters() {
+    const focused = document.activeElement?.id;
+    const fixedOpen = $('fixedParameters')?.open || false;
+    $('reportFilterFields').innerHTML = reportFacetFields(fixedOpen);
+    if (focused?.startsWith('filter-')) $(focused)?.focus({preventScroll:true});
+    renderReportCards();
   }
   function reportList() {
     return `${pageHeading('THE RESEARCH ARCHIVE','回测报告','每一份报告，都保留参数、交易与验证依据。',`<button class="button heading-download" data-action="download-all">${icon('download')}导出研究数据</button>`)}${notice('只收录通过原始报告与逐笔记录核对的结果。同组参数和点差方案不能当作独立样本；训练与后续区间各自从初始资金开始，不能合并利润。')}${reportFilters()}<div class="report-cards" id="reportCards"></div>`;
@@ -328,7 +351,7 @@
     $('previousPage').disabled=state.page<=1;$('nextPage').disabled=state.page>=pageCount;
   }
   function dialogParameters(report){
-    const s=report.summary,fields=[['策略',report.strategy],['品种 / 周期',report.symbol+' / '+report.timeframe],['固定点差',report.spread+' points'],['初始资金',s.initial_deposit+' USD'],['模型',s.model],['建模质量',s.history_quality+'（不是盈利概率）'],['K 线 / 模拟即时价',num(s.bars)+' / '+num(s.ticks)],['图表错配错误',s.mismatched_chart_errors],...s.inputs.split(';').map(input=>input.trim()).filter(Boolean).map(input=>input.split('='))];
+    const s=report.summary,fields=[['策略',report.strategy],['品种 / 周期',report.symbol+' / '+report.timeframe],['固定点差',report.spread+' points'],['初始资金',s.initial_deposit+' USD'],['模型',s.model],['建模质量',s.history_quality+'（不是盈利概率）'],['K 线 / 模拟即时价',num(s.bars)+' / '+num(s.ticks)],['图表错配错误',s.mismatched_chart_errors],...Object.entries(report.parameters)];
     return `<dl class="parameter-list">${fields.map(([key,value])=>`<div ${key==='模型'?'class="wide"':''}><dt>${esc(key)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>${notice('MaximumRisk 不是有止损保证的单笔风险上限。本报告未设置订单级固定止损止盈；EA 按条件退出，最后一笔由测试器结束时平仓。')}`;
   }
   function renderDialogTab(){
@@ -357,7 +380,7 @@
     const action=event.target.closest('[data-action]');if(!action)return;
     switch(action.dataset.action){
       case 'download-all':download('mistofpandian-research.json',JSON.stringify({...DATA,notes:publicNotes()},null,2));notify('已导出全部公开研究数据');break;
-      case 'reset-filters':state.query='';state.spread='all';state.symbol='all';renderRoute();break;
+      case 'reset-filters':state.query='';state.filters={};renderRoute();$('reportSearch')?.focus();break;
       case 'close-dialog':$('reportDialog').close();break;
       case 'export-report':exportReport(reportById(state.dialog));break;
       case 'export-csv':exportCSV();break;
@@ -366,14 +389,14 @@
     }
   });
   document.addEventListener('input',event=>{
-    if(event.target.id==='reportSearch'){state.query=event.target.value;renderReportCards();}
+    if(event.target.id==='reportSearch'){state.query=event.target.value;refreshReportFilters();}
     if(event.target.id==='tradeSearch'){state.tradeQuery=event.target.value;state.page=1;renderTradeRows();}
   });
   document.addEventListener('change',event=>{
+    const field = event.target.dataset.reportFilter;
+    if (field) { state.filters=FILTERS.update(state.filters,field,event.target.value);refreshReportFilters();return; }
     switch(event.target.id){
       case 'reportSelect':state.selected=event.target.value;renderRoute();break;
-      case 'symbolFilter':state.symbol=event.target.value;renderReportCards();break;
-      case 'spreadFilter':state.spread=event.target.value;renderReportCards();break;
       case 'directionFilter':state.direction=event.target.value;state.page=1;renderTradeRows();break;
       case 'tuningPhase':state.tuningPhase=event.target.value;renderRoute();break;
       case 'tuningTimeframe':state.tuningTimeframe=event.target.value;renderRoute();break;

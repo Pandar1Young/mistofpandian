@@ -1,6 +1,152 @@
 {
   "site": "mistofpandian",
-  "generatedAt": "2026-10-19T11:00:23.609658+09:00",
+  "generatedAt": "2026-10-19T11:22:30.717088+09:00",
+  "metadata": {
+    "schemaVersion": 1,
+    "source": "verified-report-inputs",
+    "strategies": [
+      {
+        "id": "ea-d61fed38736e878f",
+        "name": "Moving Average",
+        "parameters": [
+          {
+            "key": "Lots",
+            "label": "手数参数",
+            "unit": "手",
+            "description": "EA输入的手数参数；实际手数由EA算法决定。",
+            "type": "number",
+            "values": [
+              "0.1"
+            ],
+            "varying": false
+          },
+          {
+            "key": "MaximumRisk",
+            "label": "MaximumRisk",
+            "unit": "",
+            "description": "原EA的资金参数，不代表有固定止损保证的风险上限。",
+            "type": "number",
+            "values": [
+              "0.02"
+            ],
+            "varying": false
+          },
+          {
+            "key": "DecreaseFactor",
+            "label": "减仓系数",
+            "unit": "",
+            "description": "原EA连续亏损后的手数调整系数。",
+            "type": "number",
+            "values": [
+              "3"
+            ],
+            "varying": false
+          },
+          {
+            "key": "MovingPeriod",
+            "label": "均线周期",
+            "unit": "根K线",
+            "description": "计算均线所用的K线根数。",
+            "type": "number",
+            "values": [
+              "8",
+              "12",
+              "20"
+            ],
+            "varying": true
+          },
+          {
+            "key": "MovingShift",
+            "label": "平移量",
+            "unit": "根K线",
+            "description": "均线在图表上的平移根数，不是止损止盈点数。",
+            "type": "number",
+            "values": [
+              "3",
+              "6",
+              "9"
+            ],
+            "varying": true
+          }
+        ]
+      }
+    ],
+    "dimensions": [
+      {
+        "key": "eaId",
+        "label": "EA / 策略",
+        "allLabel": "全部 EA",
+        "options": [
+          {
+            "value": "ea-d61fed38736e878f",
+            "label": "Moving Average"
+          }
+        ]
+      },
+      {
+        "key": "symbol",
+        "label": "交易品种",
+        "allLabel": "全部品种",
+        "options": [
+          {
+            "value": "EURUSD",
+            "label": "EURUSD"
+          }
+        ]
+      },
+      {
+        "key": "timeframe",
+        "label": "时间间隔（K线）",
+        "allLabel": "全部时间间隔",
+        "options": [
+          {
+            "value": "H1",
+            "label": "H1 · 1小时"
+          },
+          {
+            "value": "H4",
+            "label": "H4 · 4小时"
+          }
+        ]
+      },
+      {
+        "key": "spread",
+        "label": "固定点差",
+        "allLabel": "全部点差",
+        "options": [
+          {
+            "value": "20",
+            "label": "20 points"
+          },
+          {
+            "value": "30",
+            "label": "30 points"
+          }
+        ]
+      },
+      {
+        "key": "phase",
+        "label": "研究区间",
+        "allLabel": "全部区间",
+        "options": [
+          {
+            "value": "comparison",
+            "label": "原点差对照"
+          },
+          {
+            "value": "training",
+            "label": "训练筛选"
+          },
+          {
+            "value": "validation",
+            "label": "后续检验"
+          }
+        ],
+        "missingValue": "comparison"
+      }
+    ],
+    "note": "参数名称、类型及可选值从已核验报告自动发现；中文标签为可选展示配置。只筛选已有结果，不触发调参或回测。"
+  },
   "studies": [
     {
       "id": "20261018_183913_541992",
@@ -659,7 +805,15 @@
         }
       ],
       "sourceHash": "6d39630cc36c492e6f47d393bb1a9764b62b2c72558305dd798e3d48bf1fe6dc",
-      "reportUrl": "reports/20261018_183913_541992-s20.html"
+      "reportUrl": "reports/20261018_183913_541992-s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261018_183913_541992-s30",
@@ -1232,7 +1386,15 @@
         }
       ],
       "sourceHash": "8e67e6c17d6435d20e7fa71dbe31576ec9978055acf42017d074f45dd7148fd3",
-      "reportUrl": "reports/20261018_183913_541992-s30.html"
+      "reportUrl": "reports/20261018_183913_541992-s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p8_m3_s20",
@@ -1852,7 +2014,15 @@
         }
       ],
       "sourceHash": "5edd2ef695cfb68728860885dd0bda32d40af688e45df9b52df1701f7c2f93fe",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p8_m3_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p8_m3_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "8",
+        "MovingShift": "3"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p8_m3_s30",
@@ -2472,7 +2642,15 @@
         }
       ],
       "sourceHash": "7e6920fe29a2617abe4c9e9d708820410488937b6be1dbb43b6fa55bd9d8d95f",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p8_m3_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p8_m3_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "8",
+        "MovingShift": "3"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p8_m6_s20",
@@ -2896,7 +3074,15 @@
         }
       ],
       "sourceHash": "1e6e89fa8d9375727358e70625c64c309bbcb1687040f85d6c6f0f42316f5746",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p8_m6_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p8_m6_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "8",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p8_m6_s30",
@@ -3320,7 +3506,15 @@
         }
       ],
       "sourceHash": "caec3a71aac049d426f0672fd8dccf16b3d3cadb3ee9137809c94b25a991debd",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p8_m6_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p8_m6_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "8",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p8_m9_s20",
@@ -3688,7 +3882,15 @@
         }
       ],
       "sourceHash": "a8047f8ab5563f14e620a474a3e9c4b20667cb5d1d5058fbc2be7c0a7bf866f8",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p8_m9_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p8_m9_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "8",
+        "MovingShift": "9"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p8_m9_s30",
@@ -4056,7 +4258,15 @@
         }
       ],
       "sourceHash": "b2521debeb84a27e8bb7e4854eecf2d041bd813c41d0e247e2abb3317846abaf",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p8_m9_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p8_m9_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "8",
+        "MovingShift": "9"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p12_m3_s20",
@@ -4578,7 +4788,15 @@
         }
       ],
       "sourceHash": "f549e72442ccea4af13f698e4b763b74aca03d25ef9e21ba70316b7b68435c75",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p12_m3_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p12_m3_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "3"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p12_m3_s30",
@@ -5100,7 +5318,15 @@
         }
       ],
       "sourceHash": "c7c7ff0d251960a200dcc99744228d359f3636aa5c6a33e7128e13d8a5e9d37b",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p12_m3_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p12_m3_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "3"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p12_m6_s20",
@@ -5552,7 +5778,15 @@
         }
       ],
       "sourceHash": "6461cbf6c8703a3f246dc276ef0c1683b70e19887e7af8f9bf03a2768954da49",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p12_m6_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p12_m6_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p12_m6_s30",
@@ -6004,7 +6238,15 @@
         }
       ],
       "sourceHash": "85f1029d7d8a4555d7d06fc750302b2d0e9eb37f00442994082a60d5fc416682",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p12_m6_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p12_m6_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p12_m9_s20",
@@ -6372,7 +6614,15 @@
         }
       ],
       "sourceHash": "d3606758c7425e9e8c1a49e859226ee27d1fd63999c155a0c97038eba51ba8b3",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p12_m9_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p12_m9_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "9"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p12_m9_s30",
@@ -6740,7 +6990,15 @@
         }
       ],
       "sourceHash": "78f743efa0c8437d775ed3cabae5938b35aec5abe1fe7b8afea292f11c86676e",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p12_m9_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p12_m9_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "9"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p20_m3_s20",
@@ -7094,7 +7352,15 @@
         }
       ],
       "sourceHash": "5e797dad5bc6c22526fc53f46c3ab0663ed067a12a8143c772e969ec43401c21",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p20_m3_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p20_m3_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "20",
+        "MovingShift": "3"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p20_m3_s30",
@@ -7448,7 +7714,15 @@
         }
       ],
       "sourceHash": "462c88ca18d3ed52f3c7ed5e7723a45f43450ba0cf17e8ecd85cf2ce101418d1",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p20_m3_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p20_m3_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "20",
+        "MovingShift": "3"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p20_m6_s20",
@@ -7732,7 +8006,15 @@
         }
       ],
       "sourceHash": "52a95315da519b55b52ec1cf903ae7da5d62cd6b0ffead12de3de7dcc60e5c65",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p20_m6_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p20_m6_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "20",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p20_m6_s30",
@@ -8016,7 +8298,15 @@
         }
       ],
       "sourceHash": "c061252746050fe3e8c29451b91254a499abc29d3ddafa2bd0c2707011579a56",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p20_m6_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p20_m6_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "20",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p20_m9_s20",
@@ -8286,7 +8576,15 @@
         }
       ],
       "sourceHash": "ff2d66f660896c84d36d59ea1275f948b7ec384dbbd426f152e57c78fb251559",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p20_m9_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p20_m9_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "20",
+        "MovingShift": "9"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H1_p20_m9_s30",
@@ -8556,7 +8854,15 @@
         }
       ],
       "sourceHash": "15eae37a1f199bfe9ca58246ea85ef5b3e9e68d1be94bd9edfebd453b5d93a18",
-      "reportUrl": "reports/20261019_104627_415661-train_H1_p20_m9_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H1_p20_m9_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "20",
+        "MovingShift": "9"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p8_m3_s20",
@@ -8728,7 +9034,15 @@
         }
       ],
       "sourceHash": "87377ecffd22ed63f708044f5ea29c104ab35243471cdbf301e1f72ec2724944",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p8_m3_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p8_m3_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "8",
+        "MovingShift": "3"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p8_m3_s30",
@@ -8900,7 +9214,15 @@
         }
       ],
       "sourceHash": "23b10426a8c5a6e057ae317facdc5a9b393267fc8b8d53238ecfda75f2f291bf",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p8_m3_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p8_m3_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "8",
+        "MovingShift": "3"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p8_m6_s20",
@@ -9086,7 +9408,15 @@
         }
       ],
       "sourceHash": "95427e89d594dc210f14c6bf63fc048869f07bb13c6d4971da2b902d921c43f8",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p8_m6_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p8_m6_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "8",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p8_m6_s30",
@@ -9272,7 +9602,15 @@
         }
       ],
       "sourceHash": "b39a4b49da240dceb49a8a5234d6f688f7f29800e9fc5cb3584964e27f87d081",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p8_m6_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p8_m6_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "8",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p8_m9_s20",
@@ -9388,7 +9726,15 @@
         }
       ],
       "sourceHash": "a22c7f6a40dd84cc7dfeacbb5d4642f8ae32b2f56967937fda0c8cb021549125",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p8_m9_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p8_m9_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "8",
+        "MovingShift": "9"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p8_m9_s30",
@@ -9504,7 +9850,15 @@
         }
       ],
       "sourceHash": "7e2d15df4818111d5a21ca17044f1b1e763afedcaf5faeb6fea936f4a63f4c81",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p8_m9_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p8_m9_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "8",
+        "MovingShift": "9"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p12_m3_s20",
@@ -9676,7 +10030,15 @@
         }
       ],
       "sourceHash": "00e79e56f811396adb3cea581461085b67f3c6c66b17416cd394b619895e0f09",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p12_m3_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p12_m3_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "3"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p12_m3_s30",
@@ -9848,7 +10210,15 @@
         }
       ],
       "sourceHash": "5a07037b3516949db86fa0b4a21b89dc373f14febc9afbf461812d484f9539b7",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p12_m3_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p12_m3_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "3"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p12_m6_s20",
@@ -9964,7 +10334,15 @@
         }
       ],
       "sourceHash": "39469e9ad59ce1f2dbe734ede26c34f0376379982a771d0816e538c68355897d",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p12_m6_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p12_m6_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p12_m6_s30",
@@ -10080,7 +10458,15 @@
         }
       ],
       "sourceHash": "c29306851b7d74f389136c4c485a66aac9b8de2b644e839a5e6a358aca4a75a6",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p12_m6_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p12_m6_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p12_m9_s20",
@@ -10154,7 +10540,15 @@
         }
       ],
       "sourceHash": "fc3fe67267d79ed93110de857fc7ca1a0f95b2dfd6ed58258d23ad2c23e47baf",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p12_m9_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p12_m9_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "9"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p12_m9_s30",
@@ -10228,7 +10622,15 @@
         }
       ],
       "sourceHash": "36437dea50f124d2f3d8e5a55bdd26299fb5841c51368452b5962e160f9aef68",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p12_m9_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p12_m9_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "9"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p20_m3_s20",
@@ -10302,7 +10704,15 @@
         }
       ],
       "sourceHash": "ab3b0f9c5a9a3bd24e9cd400a3327c1e801610e9723ab3fc0748481c1c88c664",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p20_m3_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p20_m3_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "20",
+        "MovingShift": "3"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p20_m3_s30",
@@ -10376,7 +10786,15 @@
         }
       ],
       "sourceHash": "b021854fe6122aa6da2c77116c97cca56d4707eae3b34c55914c475953801e76",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p20_m3_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p20_m3_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "20",
+        "MovingShift": "3"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p20_m6_s20",
@@ -10436,7 +10854,15 @@
         }
       ],
       "sourceHash": "1039089d7a9e9f6dc58750b35198a28de3d525043ece98ad6ac4dc30299f3ed5",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p20_m6_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p20_m6_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "20",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p20_m6_s30",
@@ -10496,7 +10922,15 @@
         }
       ],
       "sourceHash": "c4ddc2f5f7e3220302b168e0c31e2e12da8672ed6a1891e4444d2c0ff230f035",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p20_m6_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p20_m6_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "20",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p20_m9_s20",
@@ -10556,7 +10990,15 @@
         }
       ],
       "sourceHash": "e60e2fb00372e27ca03076bff331a404b217cdd06e697579d4f5c14f02b9f923",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p20_m9_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p20_m9_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "20",
+        "MovingShift": "9"
+      }
     },
     {
       "id": "20261019_104627_415661-train_H4_p20_m9_s30",
@@ -10616,7 +11058,15 @@
         }
       ],
       "sourceHash": "1b2dba0188de800546370a18e879499c24508e7af2cf9fa81e8a6cc857cf3d10",
-      "reportUrl": "reports/20261019_104627_415661-train_H4_p20_m9_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-train_H4_p20_m9_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "20",
+        "MovingShift": "9"
+      }
     },
     {
       "id": "20261019_104627_415661-validation_H1_p12_m6_s20",
@@ -10802,7 +11252,15 @@
         }
       ],
       "sourceHash": "7248173988e0625778c23f1af57ade9f8dfacf1c84b9e7e48ceea97ec104bcaf",
-      "reportUrl": "reports/20261019_104627_415661-validation_H1_p12_m6_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-validation_H1_p12_m6_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-validation_H1_p12_m6_s30",
@@ -10988,7 +11446,15 @@
         }
       ],
       "sourceHash": "f1b0dbbddb0ae08755db83396b6b5dce11500eb5df6d6916ff8657b527996a4d",
-      "reportUrl": "reports/20261019_104627_415661-validation_H1_p12_m6_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-validation_H1_p12_m6_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-validation_H1_p20_m9_s20",
@@ -11118,7 +11584,15 @@
         }
       ],
       "sourceHash": "7e6f71d4284c6be5392cc0eea2d46251c8eab2f7f2e1c6c02a4b7e16e6ed9078",
-      "reportUrl": "reports/20261019_104627_415661-validation_H1_p20_m9_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-validation_H1_p20_m9_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "20",
+        "MovingShift": "9"
+      }
     },
     {
       "id": "20261019_104627_415661-validation_H1_p20_m9_s30",
@@ -11248,7 +11722,15 @@
         }
       ],
       "sourceHash": "51f242ab119ba4d4d8b4634fe9b1a73774a6e889ddf519358a16fdaf635d3367",
-      "reportUrl": "reports/20261019_104627_415661-validation_H1_p20_m9_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-validation_H1_p20_m9_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "20",
+        "MovingShift": "9"
+      }
     },
     {
       "id": "20261019_104627_415661-validation_H4_p12_m3_s20",
@@ -11350,7 +11832,15 @@
         }
       ],
       "sourceHash": "f3b0296fa87188c4ee7fc2a9abe21acba21832b67d733f5f1d352611f72283a7",
-      "reportUrl": "reports/20261019_104627_415661-validation_H4_p12_m3_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-validation_H4_p12_m3_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "3"
+      }
     },
     {
       "id": "20261019_104627_415661-validation_H4_p12_m3_s30",
@@ -11452,7 +11942,15 @@
         }
       ],
       "sourceHash": "e7974261b297303ca91055b84be3b152b7ac059160bc6c1f80f741977015f409",
-      "reportUrl": "reports/20261019_104627_415661-validation_H4_p12_m3_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-validation_H4_p12_m3_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "3"
+      }
     },
     {
       "id": "20261019_104627_415661-validation_H4_p12_m6_s20",
@@ -11554,7 +12052,15 @@
         }
       ],
       "sourceHash": "af66933e096b8bb8da662c0f9b5b2db2b61e6914136ac54d9f450dd49ec39a62",
-      "reportUrl": "reports/20261019_104627_415661-validation_H4_p12_m6_s20.html"
+      "reportUrl": "reports/20261019_104627_415661-validation_H4_p12_m6_s20.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "6"
+      }
     },
     {
       "id": "20261019_104627_415661-validation_H4_p12_m6_s30",
@@ -11656,7 +12162,15 @@
         }
       ],
       "sourceHash": "b022fe6e50ff8847282c0d32a568dbeb8f3924bb71c499c256a21f023aee6188",
-      "reportUrl": "reports/20261019_104627_415661-validation_H4_p12_m6_s30.html"
+      "reportUrl": "reports/20261019_104627_415661-validation_H4_p12_m6_s30.html",
+      "eaId": "ea-d61fed38736e878f",
+      "parameters": {
+        "Lots": "0.1",
+        "MaximumRisk": "0.02",
+        "DecreaseFactor": "3",
+        "MovingPeriod": "12",
+        "MovingShift": "6"
+      }
     }
   ],
   "history": [

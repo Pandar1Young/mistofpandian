@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "source": "verified-report-inputs",
+  "strategies": [
+    {
+      "id": "ea-d61fed38736e878f",
+      "name": "Moving Average",
+      "parameters": [
+        {
+          "key": "Lots",
+          "label": "手数参数",
+          "unit": "手",
+          "description": "EA输入的手数参数；实际手数由EA算法决定。",
+          "type": "number",
+          "values": [
+            "0.1"
+          ],
+          "varying": false
+        },
+        {
+          "key": "MaximumRisk",
+          "label": "MaximumRisk",
+          "unit": "",
+          "description": "原EA的资金参数，不代表有固定止损保证的风险上限。",
+          "type": "number",
+          "values": [
+            "0.02"
+          ],
+          "varying": false
+        },
+        {
+          "key": "DecreaseFactor",
+          "label": "减仓系数",
+          "unit": "",
+          "description": "原EA连续亏损后的手数调整系数。",
+          "type": "number",
+          "values": [
+            "3"
+          ],
+          "varying": false
+        },
+        {
+          "key": "MovingPeriod",
+          "label": "均线周期",
+          "unit": "根K线",
+          "description": "计算均线所用的K线根数。",
+          "type": "number",
+          "values": [
+            "8",
+            "12",
+            "20"
+          ],
+          "varying": true
+        },
+        {
+          "key": "MovingShift",
+          "label": "平移量",
+          "unit": "根K线",
+          "description": "均线在图表上的平移根数，不是止损止盈点数。",
+          "type": "number",
+          "values": [
+            "3",
+            "6",
+            "9"
+          ],
+          "varying": true
+        }
+      ]
+    }
+  ],
+  "dimensions": [
+    {
+      "key": "eaId",
+      "label": "EA / 策略",
+      "allLabel": "全部 EA",
+      "options": [
+        {
+          "value": "ea-d61fed38736e878f",
+          "label": "Moving Average"
+        }
+      ]
+    },
+    {
+      "key": "symbol",
+      "label": "交易品种",
+      "allLabel": "全部品种",
+      "options": [
+        {
+          "value": "EURUSD",
+          "label": "EURUSD"
+        }
+      ]
+    },
+    {
+      "key": "timeframe",
+      "label": "时间间隔（K线）",
+      "allLabel": "全部时间间隔",
+      "options": [
+        {
+          "value": "H1",
+          "label": "H1 · 1小时"
+        },
+        {
+          "value": "H4",
+          "label": "H4 · 4小时"
+        }
+      ]
+    },
+    {
+      "key": "spread",
+      "label": "固定点差",
+      "allLabel": "全部点差",
+      "options": [
+        {
+          "value": "20",
+          "label": "20 points"
+        },
+        {
+          "value": "30",
+          "label": "30 points"
+        }
+      ]
+    },
+    {
+      "key": "phase",
+      "label": "研究区间",
+      "allLabel": "全部区间",
+      "options": [
+        {
+          "value": "comparison",
+          "label": "原点差对照"
+        },
+        {
+          "value": "training",
+          "label": "训练筛选"
+        },
+        {
+          "value": "validation",
+          "label": "后续检验"
+        }
+      ],
+      "missingValue": "comparison"
+    }
+  ],
+  "note": "参数名称、类型及可选值从已核验报告自动发现；中文标签为可选展示配置。只筛选已有结果，不触发调参或回测。"
+}
