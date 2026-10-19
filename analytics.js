@@ -26,48 +26,12 @@
     } catch (_) { /* No storage writes or frontend controls. */ }
   }
   readPreferences();
-  const footer = document.querySelector('.site-footer') || document.querySelector('footer');
-  const widget = document.createElement('span');
-  widget.className = 'analytics-widget'; widget.setAttribute('aria-label', '网站访问统计');
-  const stats = document.createElement('a');
-  stats.href = COUNTER + '/'; stats.target = '_blank'; stats.rel = 'noopener noreferrer';
-  stats.textContent = '访问统计'; stats.title = '公开的近似 PV；点击统计服务自身页面可能影响其计数';
-  const badge = document.createElement('img');
-  badge.alt = '累计访问次数（PV，非独立访客）'; badge.width = 72; badge.height = 20;
-  badge.referrerPolicy = 'no-referrer'; badge.hidden = true;
-  const status = document.createElement('span'); status.className = 'analytics-status';
-  widget.append(stats, badge, status);
-  if (footer) footer.append(widget);
-  const gaControls = document.createElement('span'); gaControls.className = 'analytics-widget ga-controls';
-  const gaStatus = document.createElement('span'); gaStatus.setAttribute('role', 'status');
-  const disclosure = document.createElement('span'); disclosure.className = 'ga-disclosure';
-  disclosure.textContent = '统计由站点管理者统一配置。使用 ipify 核验公网 IP 以排除内部访问；Google 使用 Cookie 统计地区、来源、设备和页面浏览。';
-  const privacy = document.createElement('a');
-  privacy.href = 'https://policies.google.com/privacy?hl=zh-CN'; privacy.target = '_blank';
-  privacy.rel = 'noopener noreferrer'; privacy.textContent = 'Google 隐私政策';
-  const ipPrivacy = document.createElement('a');
-  ipPrivacy.href = 'https://www.ipify.org/'; ipPrivacy.target = '_blank';
-  ipPrivacy.rel = 'noopener noreferrer'; ipPrivacy.textContent = 'IP 核验服务';
-  gaControls.append(gaStatus, disclosure, privacy, ipPrivacy);
-  if (footer) footer.append(gaControls);
+  // Detached image retains aggregate counting without adding any page UI.
+  const badge = new Image();
+  badge.referrerPolicy = 'no-referrer';
   function eligible() { return SETTINGS?.enabled === true && live && !privacySignal && !optedOut && pageKey() !== null; }
   function enabled() { return eligible() && gate === 'allowed'; }
   function gaEnabled() { return enabled() && gaPreference === 'granted'; }
-  function refresh() {
-    let message;
-    if (SETTINGS?.enabled !== true) message = '统计已由站点管理者暂停';
-    else if (!live || pageKey() === null) message = '本地预览或非统计页面不计数';
-    else if (privacySignal) message = '已尊重浏览器隐私信号';
-    else if (optedOut) message = '本浏览器历史退出偏好生效';
-    else if (gate === 'pending') message = '正在核验访问来源，尚未发送统计';
-    else if (gate === 'internal') message = '内部 IP 访问已排除';
-    else if (gate === 'unavailable') message = 'IP 核验暂不可用，本次不计数';
-    else message = 'Hits · 无 Cookie · 近似 PV';
-    status.textContent = message;
-    badge.hidden = !enabled();
-    gaStatus.textContent = gaEnabled() ? 'Google 统计已开启 · 使用 Cookie' :
-      gaPreference === 'denied' && eligible() && gate === 'allowed' ? 'Google 历史退出偏好生效' : 'Google 统计未发送';
-  }
   function canonicalIP(raw) {
     if (typeof raw !== 'string' || !raw || raw.length > 45 || raw !== raw.trim()) throw Error('Invalid IP response');
     if (raw.includes(':')) {
@@ -91,15 +55,15 @@
   }
   function ensureGate() {
     if (!eligible() || gate !== 'pending' || checking) return;
-    if (!SETTINGS.ipExclusion.enabled) { gate = 'allowed'; refresh(); pageView(); gaPageView(); return; }
+    if (!SETTINGS.ipExclusion.enabled) { gate = 'allowed'; pageView(); gaPageView(); return; }
     // Check both IPv4 and dual-stack egress. A match on either excludes BOTH providers.
     // Any lookup failure prevents collection for this load; never fall back to counting.
     checking = Promise.allSettled(IP_ENDPOINTS.map(addressHash)).then(results => {
       if (results.some(r => r.status === 'fulfilled' && SETTINGS.ipExclusion.hashes.includes(r.value))) gate = 'internal';
       else gate = results.every(r => r.status === 'fulfilled') ? 'allowed' : 'unavailable';
       if (!gaEnabled()) gaStop();
-      refresh(); pageView(); gaPageView();
-    }).catch(() => { gate = 'unavailable'; gaStop(); refresh(); });
+      pageView(); gaPageView();
+    }).catch(() => { gate = 'unavailable'; gaStop(); });
   }
   function gaCommand() { window.dataLayer.push(arguments); }
   function gaFields(page) {
@@ -120,7 +84,7 @@
       gaCommand('js', new Date());
       const script = document.createElement('script'); script.async = true;
       script.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
-      script.onerror = () => { gaStatus.textContent = 'Google 统计被拦截或暂不可用，网站功能不受影响'; };
+      script.onerror = () => { /* Provider failure leaves the research UI unchanged. */ };
       document.head.append(script);
     }
     if (page === gaLastPage) return;
@@ -160,10 +124,9 @@
   function pageView() {
     if (!enabled()) return;
     const page = pageKey(); if (!page || page === lastPage) return;
-    lastPage = page; badge.hidden = false; badge.src = badgeURL(''); increment('/pages/' + page);
+    lastPage = page; badge.src = badgeURL(''); increment('/pages/' + page);
   }
-  badge.onerror = () => { badge.hidden = true; status.textContent = '统计暂不可用，网站功能不受影响'; };
-  badge.onload = () => { if (enabled()) { badge.hidden = false; status.textContent = 'Hits · 无 Cookie · 近似 PV'; } };
+  badge.onload = badge.onerror = () => { /* Aggregate counter stays detached from the page. */ };
   document.addEventListener('click', event => {
     if (!enabled()) return;
     const trigger = event.target.closest('[data-open-report]'); const id = trigger && trigger.dataset.openReport;
@@ -172,15 +135,15 @@
       if (gaEnabled()) gaCommand('event', 'report_open', {...gaFields(pageKey()), report_id:id, send_to:GA_ID});
     }
   });
-  window.addEventListener('hashchange', () => { refresh(); ensureGate(); pageView(); gaPageView(); });
+  window.addEventListener('hashchange', () => { ensureGate(); pageView(); gaPageView(); });
   window.addEventListener('storage', event => {
     if (event.key !== PRIVACY_KEY && event.key !== GA_PREFERENCE_KEY && event.key !== null) return;
     readPreferences();
     if (!gaEnabled()) gaStop();
     if (optedOut) { badge.removeAttribute('src'); lastPage = null; }
-    refresh(); ensureGate(); pageView(); gaPageView();
+    ensureGate(); pageView(); gaPageView();
   });
   window['ga-disable-' + GA_ID] = true;
   if (!eligible() || gaPreference === 'denied') gaStop();
-  refresh(); ensureGate(); pageView(); gaPageView();
+  ensureGate(); pageView(); gaPageView();
 })();
