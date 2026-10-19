@@ -3,6 +3,287 @@
   "source": "verified-report-inputs",
   "strategies": [
     {
+      "id": "ea-74a9bf0d4fb0d095",
+      "name": "KA-Gold Bot",
+      "parameters": [
+        {
+          "key": "IndicatorSettings",
+          "label": "IndicatorSettings",
+          "unit": "",
+          "description": "",
+          "type": "string",
+          "values": [
+            "\"---------------------------------------------\""
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpKeltnerPeriod",
+          "label": "Keltner 通道周期",
+          "unit": "根K线",
+          "description": "",
+          "type": "number",
+          "values": [
+            "50"
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpEMA10",
+          "label": "快速 EMA 周期",
+          "unit": "根K线",
+          "description": "",
+          "type": "number",
+          "values": [
+            "10"
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpEMA200",
+          "label": "趋势 EMA 周期",
+          "unit": "根K线",
+          "description": "",
+          "type": "number",
+          "values": [
+            "200"
+          ],
+          "varying": false
+        },
+        {
+          "key": "TradingSettings",
+          "label": "TradingSettings",
+          "unit": "",
+          "description": "",
+          "type": "string",
+          "values": [
+            "\"---------------------------------------------\""
+          ],
+          "varying": false
+        },
+        {
+          "key": "Inpuser_lot",
+          "label": "固定手数",
+          "unit": "手",
+          "description": "本轮关闭风险百分比手数，每次固定 0.1 手。",
+          "type": "number",
+          "values": [
+            "0.1"
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpSL_Pips",
+          "label": "止损输入",
+          "unit": "",
+          "description": "原 EA 的距离输入；本轮取值 500，实际解释由源码与报价精度决定，不与点差混用。",
+          "type": "number",
+          "values": [
+            "500"
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpTP_Pips",
+          "label": "止盈输入",
+          "unit": "",
+          "description": "原 EA 的距离输入，本轮取值 500，使用正值避开 TP=0 边界问题。",
+          "type": "number",
+          "values": [
+            "500"
+          ],
+          "varying": false
+        },
+        {
+          "key": "Inpuser_SLippage",
+          "label": "允许滑点输入",
+          "unit": "points",
+          "description": "EA 输入，不代表已模拟真实滑点。",
+          "type": "number",
+          "values": [
+            "3"
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpMax_spread",
+          "label": "最大点差过滤",
+          "unit": "points",
+          "description": "",
+          "type": "number",
+          "values": [
+            "65"
+          ],
+          "varying": false
+        },
+        {
+          "key": "TrailingSettings",
+          "label": "TrailingSettings",
+          "unit": "",
+          "description": "",
+          "type": "string",
+          "values": [
+            "\"---------------------------------------------\""
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpTrailingTrigger",
+          "label": "移动止损触发输入",
+          "unit": "",
+          "description": "",
+          "type": "number",
+          "values": [
+            "300"
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpTrailingStop",
+          "label": "移动止损距离输入",
+          "unit": "",
+          "description": "",
+          "type": "number",
+          "values": [
+            "300"
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpTrailingStep",
+          "label": "移动止损步长输入",
+          "unit": "",
+          "description": "",
+          "type": "number",
+          "values": [
+            "100"
+          ],
+          "varying": false
+        },
+        {
+          "key": "TimeSettings",
+          "label": "TimeSettings",
+          "unit": "",
+          "description": "",
+          "type": "string",
+          "values": [
+            "\"---------------------------------------------\""
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpTimeFilter",
+          "label": "启用交易时段过滤",
+          "unit": "",
+          "description": "本轮关闭；采用数据源标记的 UTC 时间，不假设券商时区。",
+          "type": "boolean",
+          "values": [
+            "false"
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpStartHour",
+          "label": "开始小时",
+          "unit": "",
+          "description": "时段过滤关闭，本轮不生效。",
+          "type": "number",
+          "values": [
+            "2"
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpStartMinute",
+          "label": "开始分钟",
+          "unit": "",
+          "description": "时段过滤关闭，本轮不生效。",
+          "type": "number",
+          "values": [
+            "30"
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpEndHour",
+          "label": "结束小时",
+          "unit": "",
+          "description": "时段过滤关闭，本轮不生效。",
+          "type": "number",
+          "values": [
+            "21"
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpEndMinute",
+          "label": "结束分钟",
+          "unit": "",
+          "description": "时段过滤关闭，本轮不生效。",
+          "type": "number",
+          "values": [
+            "0"
+          ],
+          "varying": false
+        },
+        {
+          "key": "MoneyManagementSettings",
+          "label": "MoneyManagementSettings",
+          "unit": "",
+          "description": "",
+          "type": "string",
+          "values": [
+            "\"---------------------------------------------\""
+          ],
+          "varying": false
+        },
+        {
+          "key": "isVolume_Percent",
+          "label": "启用风险百分比手数",
+          "unit": "",
+          "description": "本轮关闭；原算法未按止损距离与 tick value 计算风险。",
+          "type": "boolean",
+          "values": [
+            "false"
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpRisk",
+          "label": "风险百分比输入",
+          "unit": "",
+          "description": "风险百分比手数关闭，本轮不生效，不代表损失上限。",
+          "type": "number",
+          "values": [
+            "1"
+          ],
+          "varying": false
+        },
+        {
+          "key": "GeneralSettings",
+          "label": "GeneralSettings",
+          "unit": "",
+          "description": "",
+          "type": "string",
+          "values": [
+            "\"---------------------------------------------\""
+          ],
+          "varying": false
+        },
+        {
+          "key": "InpMagic",
+          "label": "订单标识",
+          "unit": "",
+          "description": "",
+          "type": "number",
+          "values": [
+            "230701"
+          ],
+          "varying": false
+        }
+      ]
+    },
+    {
       "id": "ea-d61fed38736e878f",
       "name": "Moving Average",
       "parameters": [
@@ -75,6 +356,10 @@
       "allLabel": "全部 EA",
       "options": [
         {
+          "value": "ea-74a9bf0d4fb0d095",
+          "label": "KA-Gold Bot"
+        },
+        {
           "value": "ea-d61fed38736e878f",
           "label": "Moving Average"
         }
@@ -88,6 +373,10 @@
         {
           "value": "EURUSD",
           "label": "EURUSD"
+        },
+        {
+          "value": "XAUUSD",
+          "label": "XAUUSD"
         }
       ]
     },
@@ -96,6 +385,10 @@
       "label": "时间间隔（K线）",
       "allLabel": "全部时间间隔",
       "options": [
+        {
+          "value": "M15",
+          "label": "M15 · 15分钟"
+        },
         {
           "value": "H1",
           "label": "H1 · 1小时"
@@ -118,6 +411,10 @@
         {
           "value": "30",
           "label": "30 points"
+        },
+        {
+          "value": "60",
+          "label": "60 points"
         }
       ]
     },
@@ -126,6 +423,10 @@
       "label": "研究区间",
       "allLabel": "全部区间",
       "options": [
+        {
+          "value": "baseline",
+          "label": "固定参数初筛"
+        },
         {
           "value": "comparison",
           "label": "原点差对照"
