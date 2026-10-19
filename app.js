@@ -25,7 +25,7 @@
   const polarity = n => Number(n) >= 0 ? 'positive' : 'negative';
   const DATA = window.RESEARCH_DATA;
   const titles = {overview:'研究总览',tuning:'时间平移调参',reports:'回测报告',compare:'实验对照',data:'数据档案',methodology:'方法与边界'};
-  const state = {route:'overview',selected:null,chartMode:'balance',query:'',filters:{},study:null,dialog:null,tab:'trades',direction:'all',tradeQuery:'',page:1,tuningPhase:'validation',tuningTimeframe:'all',tuningSort:'net'};
+  const state = {route:'overview',selected:null,chartMode:'balance',query:'',filters:{},compareLeft:null,compareRight:null,dialog:null,tab:'trades',direction:'all',tradeQuery:'',page:1,tuningPhase:'validation',tuningTimeframe:'all',tuningSort:'net'};
   let toastTimer;
   function notify(message) {
     $('toast').textContent = message;
@@ -76,7 +76,10 @@
   const tuningStudies = [...(DATA.tuningStudies || [])].sort((a,b) => b.createdAt.localeCompare(a.createdAt));
   const reportLabel = report => report.phase ? report.title : `${report.symbol} · ${report.timeframe} · 点差 ${report.spread}`;
   const finalBalance = report => Number(report.trades.length ? report.trades.at(-1).balance : report.summary.initial_deposit);
-  state.selected = (reports.find(r=>r.phase==='validation' && r.selectedCandidate) || reports[0]).id; state.study = studies[0]?.id;
+  state.selected = (reports.find(r=>r.phase==='validation' && r.selectedCandidate) || reports[0]).id;
+  const initialPair = reports.filter(report=>studies[0] && report.studyId===studies[0].id).sort((a,b)=>a.spread-b.spread);
+  state.compareLeft = (initialPair[0] || reports[0]).id;
+  state.compareRight = (initialPair[1] || reports[1] || reports[0]).id;
   const reportById = id => reports.find(report => report.id === id);
   const selected = () => reportById(state.selected) || reports[0];
   const summaryNumber = (report,key) => Number(report.summary[key]);
@@ -87,7 +90,7 @@
     const dates = report.summary.period.match(/\d{4}\.\d{2}\.\d{2}/g) || [];
     return {from:dates[0] || '—',to:dates[1] || '—'};
   };
-  const studyReports = () => reports.filter(report => report.studyId === state.study).sort((a,b) => a.spread-b.spread);
+  const comparisonReports = () => [reportById(state.compareLeft) || reports[0],reportById(state.compareRight) || reports[1] || reports[0]];
   const dateText = date => String(date).slice(0,10).replaceAll('-','.');
   $('navCount').textContent = String(reports.length).padStart(2,'0');
   function pageHeading(eyebrow,title,description,action='') {
@@ -190,10 +193,13 @@
       <section class="panel table-scroll"><table class="report-table tuning-table"><thead><tr>${header.map(t=>`<th scope="col">${esc(t)}</th>`).join('')}</tr></thead><tbody>${table}</tbody></table></section>
       ${notice('点数在本研究中指固定点差，不是止损止盈距离；20 / 30 points 在当前 EURUSD 五位报价中为 2 / 3 pip。不同参数可能产生不同交易，不能把差额全部解释为点差成本。所有历史结果均不保证未来收益。')}`;
   }
+  function comparisonSelector(report,side) {
+    const group=side==='Left'?'A':'B', position=side==='Left'?'左侧':'右侧', range=period(report);
+    const options=reports.map(item=>`<option value="${esc(item.id)}" ${item.id===report.id?'selected':''}>${esc(`${dateText(item.createdAt)} · ${item.strategy} · ${item.symbol} · ${reportLabel(item)}`)}</option>`).join('');
+    return `<section class="panel comparison-choice" aria-label="${position}${group}组设置"><label for="compare${side}"><span class="comparison-group group-${group.toLowerCase()}">${group} 组 · ${position}</span><span>选择回测报告</span></label><select id="compare${side}" aria-label="选择${position}${group}组报告">${options}</select><p>${esc(report.strategy)} · ${esc(report.symbol)} ${esc(report.timeframe)} · 固定点差 ${esc(report.spread)} points</p><p>${esc(range.from)} — ${esc(range.to)} · ${num(report.summary.initial_deposit)} USD 初始资金</p><div class="report-meta">${Object.entries(report.parameters).map(([key,value])=>`<span class="tag">${esc(key)} = ${esc(value)}</span>`).join('')}</div><button class="text-button" data-open-report="${esc(report.id)}">查看${group}组完整报告 <span>↗</span></button></section>`;
+  }
   function comparison() {
-    const pair = studyReports(), first=pair[0], second=pair[1];
-    if (!first || !second) return pageHeading('CONTROLLED EXPERIMENTS','实验对照','需要同一组实验的两种点差结果。');
-    const a=first.summary,b=second.summary;
+    const [first,second] = comparisonReports(), a=first.summary,b=second.summary;
     const rows = [
       ['净利润 / USD',signed(a.net_profit),signed(b.net_profit)],
       ['初始资金收益率',pct(returnPct(first)),pct(returnPct(second))],
@@ -204,7 +210,7 @@
       ['胜率',win(first).percent+'%',win(second).percent+'%'],
       ['每笔预期收益 / USD',a.expected_payoff,b.expected_payoff]
     ];
-    return `${pageHeading('ONE VARIABLE, TWO OUTCOMES','实验对照','固定其他条件，观察交易成本如何改变结果。')}<div class="filter-bar"><label for="studySelect" class="filter-count" style="margin-left:0">实验档案</label><select id="studySelect" aria-label="选择对照实验">${studies.map(study=>`<option value="${esc(study.id)}" ${study.id===state.study?'selected':''}>${dateText(study.createdAt)} · ${esc(study.symbol)} 点差对照</option>`).join('')}</select><span class="filter-count">同一策略 / 同一数据 / 同一参数</span></div><div class="compare-layout"><section class="panel"><div class="panel-head"><div><h2>相同交易，不同成本</h2><p class="panel-subtitle">${esc(first.strategy)} · ${esc(first.symbol)} ${esc(first.timeframe)} · ${num(a.initial_deposit)} USD 初始资金</p></div>${verified}</div><div class="table-scroll section-spaced"><table class="comparison-table"><thead><tr><th scope="col">报告指标</th><th scope="col">点差 ${first.spread}</th><th scope="col">点差 ${second.spread}</th></tr></thead><tbody>${rows.map((row,i)=>`<tr ${i===0?'class="emphasized"':''}>${row.map((cell,j)=>`<td class="${j?'mono':''}">${esc(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section><section class="panel full-width"><div class="panel-head"><div><h2>已平仓余额 · 双方案对照</h2><p class="panel-subtitle">两组均从 ${num(a.initial_deposit)} USD 开始；横轴为平仓顺序</p></div><div class="chart-legend"><span><i style="background:var(--green)"></i>点差 ${first.spread}</span><span><i style="background:var(--blue)"></i>点差 ${second.spread}</span></div></div><div id="compareChart" class="chart-container"></div><div class="chart-caption"><span>来源：同组两份 MT4 报告 · ${esc(period(first).from)} — ${esc(period(first).to)}</span><span>曲线不包含持仓期间浮动盈亏</span></div></section></div>${notice('两组开平仓时间、方向与手数一致，均为 0.10 手。此处只比较本次固定点差实验；每笔减少 1 USD 不是适用于所有品种或合约的通用成本公式。')}`;
+    return `${pageHeading('COMPARE VERIFIED REPORTS','实验对照','左右独立选择两份已归档报告，对照指标与已平仓余额。')}<div class="comparison-selectors">${comparisonSelector(first,'Left')}${comparisonSelector(second,'Right')}</div>${first.id===second.id?notice('当前 A、B 两组选择了同一份报告，指标与曲线相同。'):''}<div class="compare-layout"><section class="panel"><div class="panel-head"><div><h2>两组回测指标</h2><p class="panel-subtitle">A 组对应左侧选择，B 组对应右侧选择；测试条件见上方</p></div>${verified}</div><div class="table-scroll section-spaced"><table class="comparison-table"><thead><tr><th scope="col">报告指标</th><th scope="col">A 组 · ${esc(first.timeframe)} · 点差 ${esc(first.spread)}</th><th scope="col">B 组 · ${esc(second.timeframe)} · 点差 ${esc(second.spread)}</th></tr></thead><tbody>${rows.map((row,i)=>`<tr ${i===0?'class="emphasized"':''}>${row.map((cell,j)=>`<td class="${j?'mono':''}">${esc(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section><section class="panel full-width"><div class="panel-head"><div><h2>已平仓余额 · 双方案对照</h2><p class="panel-subtitle">A 组初始 ${num(a.initial_deposit)} USD / B 组初始 ${num(b.initial_deposit)} USD；横轴按各组平仓顺序排列</p></div><div class="chart-legend"><span><i style="background:var(--green)"></i>A 组 · ${esc(first.timeframe)} · 点差 ${esc(first.spread)}</span><span><i style="background:var(--blue)"></i>B 组 · ${esc(second.timeframe)} · 点差 ${esc(second.spread)}</span></div></div><div id="compareChart" class="chart-container"></div><div class="chart-caption"><span>来源：所选两份已核验 MT4 报告 · 横轴不代表相同日期</span><span>曲线不包含持仓期间浮动盈亏</span></div></section></div>${notice('可对照不同周期、参数或研究区间；这些差异可能同时影响结果，不能把利润差额全部归因于点差。训练与后续检验不等价，历史表现不保证未来收益。')}`;
   }
   function dataPage() {
     const histories = DATA.history || [];
@@ -245,7 +251,7 @@
       const balances=[Number(report.summary.initial_deposit),...report.trades.map(trade=>Number(trade.balance))];
       let peak=balances[0];
       const values=mode==='drawdown'?balances.map(value=>{peak=Math.max(peak,value);return (value/peak-1)*100;}):balances;
-      return {report,values,color:colors[index%colors.length]};
+      return {report,values,color:colors[index%colors.length],label:targetId==='compareChart'?`${index===0?'A':'B'} 组`:`点差 ${report.spread}`};
     });
     const all=series.flatMap(item=>item.values),min=Math.min(...all),max=Math.max(...all),span=Math.max(max-min,mode==='drawdown'?1:20);
     let lo,hi,step;
@@ -283,7 +289,7 @@
     }
     series.forEach(item=>{
       const color=mode==='drawdown'?(dark?'#d7968c':'#b47a70'):item.color;
-      make('path',{d:'M'+item.values.map((value,index)=>`${x(index)} ${y(value)}`).join(' L'),fill:'none',stroke:color,'stroke-width':2.3,'stroke-linejoin':'round','stroke-linecap':'round'});
+      make('path',{d:'M'+item.values.map((value,index)=>`${x(index)} ${y(value)}`).join(' L'),fill:'none',stroke:color,'stroke-width':2.3,'stroke-linejoin':'round','stroke-linecap':'round','data-series-report':item.report.id,'data-series-label':item.label});
       const last=item.values.length-1;
       make('circle',{cx:x(last),cy:y(item.values[last]),r:3.4,fill:color,stroke:dark?'#1d2623':'white','stroke-width':2});
     });
@@ -296,14 +302,22 @@
     function show(index,pointerX){
       activeIndex=Math.max(0,Math.min(count,index));
       const px=x(activeIndex);cursor.setAttribute('x1',px);cursor.setAttribute('x2',px);cursor.setAttribute('visibility','visible');
-      circles.forEach((circle,i)=>{circle.setAttribute('cx',px);circle.setAttribute('cy',y(series[i].values[activeIndex]));circle.setAttribute('visibility','visible');});
-      const first=series[0].report;
-      tooltip.innerHTML=(activeIndex?`第 ${activeIndex} 笔平仓 · ${esc(first.trades[activeIndex-1].closed)}`:'起始资金')+'<br>'+series.map(item=>`点差 ${item.report.spread}：<strong>${mode==='drawdown'?item.values[activeIndex].toFixed(2)+'%':'$'+money(item.values[activeIndex])}</strong>`).join('<br>');
+      circles.forEach((circle,i)=>{
+        const value=series[i].values[activeIndex];
+        circle.setAttribute('visibility',value===undefined?'hidden':'visible');
+        if(value!==undefined){circle.setAttribute('cx',px);circle.setAttribute('cy',y(value));}
+      });
+      const descriptions=series.map(item=>{
+        const value=item.values[activeIndex],trade=item.report.trades[activeIndex-1];
+        if(value===undefined)return `${esc(item.label)}：已结束（共 ${item.report.trades.length} 笔）`;
+        return `${esc(item.label)}：<strong>${mode==='drawdown'?value.toFixed(2)+'%':'$'+money(value)}</strong>${trade?` · ${esc(trade.closed)}`:''}`;
+      });
+      tooltip.innerHTML=(activeIndex?`第 ${activeIndex} 笔平仓（各组独立顺序）`:'起始资金')+'<br>'+descriptions.join('<br>');
       tooltip.hidden=false;
       const rect=container.getBoundingClientRect(),ideal=pointerX===undefined?px/W*rect.width:pointerX-rect.left;
       tooltip.style.left=Math.max(6,Math.min(ideal+12,rect.width-tooltip.offsetWidth-8))+'px';tooltip.style.top='30px';
       svg.setAttribute('aria-valuenow',String(activeIndex));
-      svg.setAttribute('aria-valuetext',`第 ${activeIndex} 笔，${series.map(item=>`点差 ${item.report.spread}：${mode==='drawdown'?item.values[activeIndex].toFixed(2)+'%':money(item.values[activeIndex])+' USD'}`).join('；')}`);
+      svg.setAttribute('aria-valuetext',`第 ${activeIndex} 笔，${descriptions.map(text=>text.replace(/<[^>]*>/g,'')).join('；')}`);
     }
     function hide(){cursor.setAttribute('visibility','hidden');circles.forEach(circle=>circle.setAttribute('visibility','hidden'));tooltip.hidden=true;}
     svg.addEventListener('pointermove',event=>{const rect=svg.getBoundingClientRect();show(Math.round(((event.clientX-rect.left)/rect.width*W-pad.left)/(W-pad.left-pad.right)*count),event.clientX);});
@@ -316,7 +330,7 @@
   }
   function drawAllCharts(){
     if($('overviewChart'))chart('overviewChart',[selected()],state.chartMode);
-    if($('compareChart'))chart('compareChart',studyReports());
+    if($('compareChart'))chart('compareChart',comparisonReports());
     drawSparklines();
   }
   function exportReport(report){
@@ -400,7 +414,13 @@
       case 'tuningPhase':state.tuningPhase=event.target.value;renderRoute();break;
       case 'tuningTimeframe':state.tuningTimeframe=event.target.value;renderRoute();break;
       case 'tuningSort':state.tuningSort=event.target.value;renderRoute();break;
-      case 'studySelect':state.study=event.target.value;renderRoute();break;
+      case 'compareLeft':
+      case 'compareRight':
+        if(reportById(event.target.value)){
+          const id=event.target.id,scroll=window.scrollY;
+          state[id]=event.target.value;renderRoute();$(id).focus({preventScroll:true});window.scrollTo(0,scroll);
+        }
+        break;
     }
   });
   document.addEventListener('keydown',event=>{
