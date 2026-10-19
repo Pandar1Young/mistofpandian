@@ -146,12 +146,15 @@
     const current = state.filters[field.id] || '';
     return `<label class="facet-control" for="filter-${esc(field.id)}"><span>${esc(field.label)}${field.unit?` <small>(${esc(field.unit)})</small>`:''}</span>${field.kind==='parameter'?`<code>${esc(field.key)}</code>`:''}<select id="filter-${esc(field.id)}" data-report-filter="${esc(field.id)}" ${field.description?`aria-describedby="help-${esc(field.id)}"`:''}><option value="">${esc(field.allLabel)}</option>${field.options.map(option=>`<option value="${esc(option.value)}" ${current===option.value?'selected':''} ${!option.count&&current!==option.value?'disabled':''}>${esc(option.label)} · ${option.count} 份</option>`).join('')}</select>${field.description?`<small class="facet-help" id="help-${esc(field.id)}">${esc(field.description)}</small>`:''}</label>`;
   }
-  function reportFacetFields(fixedOpen=false) {
-    const fields = FILTERS.facets(reports, DATA.metadata, state.filters, state.query);
-    const dimensions = fields.filter(f=>f.kind==='dimension');
+  function reportParameterFields(fields, fixedOpen=false) {
     const varying = fields.filter(f=>f.kind==='parameter'&&f.varying);
     const fixed = fields.filter(f=>f.kind==='parameter'&&!f.varying);
-    return `<section class="common-filters" aria-labelledby="commonFiltersHeading"><div class="facet-heading"><h2 id="commonFiltersHeading">通用回测条件</h2><span>各条件取交集 · 选项数字为匹配报告数</span></div><div class="facet-grid">${dimensions.map(facetControl).join('')}</div></section><section class="ea-parameter-filters" aria-labelledby="eaParametersHeading"><div class="facet-heading"><h2 id="eaParametersHeading">EA 专属参数筛选</h2><span>随所选 EA 变化 · 从已核验报告自动读取</span></div>${varying.length?`<div class="facet-grid parameter-grid">${varying.map(facetControl).join('')}</div>`:'<p class="metadata-note">当前 EA 的输入参数没有不同取值，可展开下方查看。</p>'}${fixed.length?`<details id="fixedParameters" class="fixed-parameters" ${fixedOpen?'open':''}><summary>更多参数 · 当前各 EA 内仅一个已收录取值（${fixed.length} 项）${fixed.some(f=>state.filters[f.id])?' · 已有筛选':''}</summary><div class="facet-grid parameter-grid">${fixed.map(facetControl).join('')}</div></details>`:''}</section>`;
+    return `<div class="facet-heading"><h2 id="eaParametersHeading">EA 专属参数筛选</h2><span>随所选 EA 变化 · 从已核验报告自动读取</span></div>${varying.length?`<div class="facet-grid parameter-grid">${varying.map(facetControl).join('')}</div>`:'<p class="metadata-note">当前 EA 的输入参数没有不同取值，可展开下方查看。</p>'}${fixed.length?`<details id="fixedParameters" class="fixed-parameters" ${fixedOpen?'open':''}><summary>更多参数 · 当前各 EA 内仅一个已收录取值（${fixed.length} 项）${fixed.some(f=>state.filters[f.id])?' · 已有筛选':''}</summary><div class="facet-grid parameter-grid">${fixed.map(facetControl).join('')}</div></details>`:''}`;
+  }
+  function reportFacetFields() {
+    const fields = FILTERS.facets(reports, DATA.metadata, state.filters, state.query);
+    const error = FILTERS.tradeRange(state.filters).error;
+    return `<section class="common-filters" aria-labelledby="commonFiltersHeading"><div class="facet-heading"><h2 id="commonFiltersHeading">通用回测条件</h2><span>各条件取交集 · 选项数字为匹配报告数</span></div><div class="facet-grid" id="commonFacetFields">${fields.filter(f=>f.kind==='dimension').map(facetControl).join('')}</div><fieldset class="trade-count-range"><legend>交易次数（笔）</legend><div class="trade-count-bounds">${['min','max'].map((bound,index)=>`<label class="facet-control" for="filter-r-trades-${bound}"><span>${index?'最大值':'最小值'}</span><input id="filter-r-trades-${bound}" type="number" min="0" step="1" inputmode="numeric" placeholder="不限" data-trade-bound="r-trades-${bound}" value="${esc(state.filters[`r-trades-${bound}`] || '')}" aria-describedby="tradeRangeHelp tradeRangeError" aria-invalid="${Boolean(error)}"></label>`).join('')}</div><p id="tradeRangeHelp" class="facet-help">按报告中的总交易次数筛选，包含上下限；留空表示不限。</p><p id="tradeRangeError" class="range-error" role="status">${esc(error)}</p></fieldset></section><section class="ea-parameter-filters" aria-labelledby="eaParametersHeading">${reportParameterFields(fields)}</section>`;
   }
   function reportFilters() {
     return `<section class="panel report-filters" aria-label="回测报告筛选"><div class="report-filter-toolbar"><label class="search-box">${icon('search')}<span class="screen-reader">搜索报告</span><input id="reportSearch" type="search" placeholder="搜索策略、品种、参数或报告…" value="${esc(state.query)}" autocomplete="off"></label><button class="button" data-action="reset-filters">清空筛选</button><span class="filter-count" id="reportCount" role="status" aria-live="polite"></span></div><div id="reportFilterFields">${reportFacetFields()}</div><p class="metadata-note">${esc(DATA.metadata.note)} 时间间隔为 K 线周期，点差以 points 计；EA 专属参数的含义与单位见各筛选项说明。<a href="data/metadata.json" target="_blank" rel="noopener">查看元数据 JSON ↗</a></p></section>`;
@@ -159,7 +162,12 @@
   function refreshReportFilters() {
     const focused = document.activeElement?.id;
     const fixedOpen = $('fixedParameters')?.open || false;
-    $('reportFilterFields').innerHTML = reportFacetFields(fixedOpen);
+    const fields = FILTERS.facets(reports, DATA.metadata, state.filters, state.query);
+    $('commonFacetFields').innerHTML = fields.filter(f=>f.kind==='dimension').map(facetControl).join('');
+    document.querySelector('.ea-parameter-filters').innerHTML = reportParameterFields(fields, fixedOpen);
+    const error = FILTERS.tradeRange(state.filters).error;
+    $('tradeRangeError').textContent = error;
+    document.querySelectorAll('[data-trade-bound]').forEach(input=>input.setAttribute('aria-invalid', String(Boolean(error))));
     if (focused?.startsWith('filter-')) $(focused)?.focus({preventScroll:true});
     renderReportCards();
   }
@@ -402,6 +410,10 @@
     }
   });
   document.addEventListener('input',event=>{
+    if(event.target.dataset.tradeBound){
+      state.filters=FILTERS.update(state.filters,event.target.dataset.tradeBound,event.target.validity.badInput?'invalid':event.target.value);
+      refreshReportFilters();
+    }
     if(event.target.id==='reportSearch'){state.query=event.target.value;refreshReportFilters();}
     if(event.target.id==='tradeSearch'){state.tradeQuery=event.target.value;state.page=1;renderTradeRows();}
   });

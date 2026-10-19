@@ -23,7 +23,27 @@
     const raw = report[field.key] ?? field.missingValue;
     return raw == null ? undefined : String(raw);
   }
+  function tradeRange(selections = {}) {
+    const bound = key => {
+      const raw = selections[key];
+      if (raw == null || String(raw).trim() === '') return null;
+      const number = Number(raw);
+      return Number.isSafeInteger(number) && number >= 0 ? number : NaN;
+    };
+    const min = bound('r-trades-min'), max = bound('r-trades-max');
+    const error = Number.isNaN(min) || Number.isNaN(max) ? '交易次数须为 0 或正整数。'
+      : min !== null && max !== null && min > max ? '交易次数最小值不能大于最大值。' : '';
+    return {min, max, error};
+  }
   function matches(report, selections, descriptors, query = '', except = '') {
+    const range = tradeRange(selections);
+    if (range.error) return false;
+    if (range.min !== null || range.max !== null) {
+      const raw = report.summary?.total_trades;
+      const count = raw == null || String(raw).trim() === '' ? NaN : Number(raw);
+      if (!Number.isSafeInteger(count) || count < 0
+        || (range.min !== null && count < range.min) || (range.max !== null && count > range.max)) return false;
+    }
     for (const field of descriptors) {
       const selected = selections[field.id];
       if (field.id !== except && selected != null && selected !== '' && value(report, field) !== selected) return false;
@@ -59,5 +79,5 @@
     if (selected === '') delete next[field]; else next[field] = selected;
     return next;
   }
-  return {fields, value, matches, filter, facets, update};
+  return {fields, value, matches, filter, facets, update, tradeRange};
 });
