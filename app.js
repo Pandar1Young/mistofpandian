@@ -25,7 +25,7 @@
   const polarity = n => Number(n) >= 0 ? 'positive' : 'negative';
   const DATA = window.RESEARCH_DATA;
   const titles = {overview:'研究总览',tuning:'时间平移调参',reports:'回测报告',compare:'实验对照',data:'数据档案',methodology:'方法与边界'};
-  const state = {route:'overview',selected:null,chartMode:'balance',query:'',filters:{},compareLeft:null,compareRight:null,dialog:null,tab:'trades',direction:'all',tradeQuery:'',page:1,tuningPhase:'validation',tuningTimeframe:'all',tuningSort:'net'};
+  const state = {route:'overview',selected:null,chartMode:'balance',compareAxis:'date',query:'',filters:{},compareLeft:null,compareRight:null,dialog:null,tab:'trades',direction:'all',tradeQuery:'',page:1,tuningPhase:'validation',tuningTimeframe:'all',tuningSort:'net'};
   let toastTimer;
   function notify(message) {
     $('toast').textContent = message;
@@ -228,7 +228,7 @@
       ['胜率',win(first).percent+'%',win(second).percent+'%'],
       ['每笔预期收益 / USD',a.expected_payoff,b.expected_payoff]
     ];
-    return `${pageHeading('COMPARE VERIFIED REPORTS','实验对照','左右独立选择两份已归档报告，对照指标与已平仓余额。')}<div class="comparison-selectors">${comparisonSelector(first,'Left')}${comparisonSelector(second,'Right')}</div>${first.id===second.id?notice('当前 A、B 两组选择了同一份报告，指标与曲线相同。'):''}<div class="compare-layout"><section class="panel"><div class="panel-head"><div><h2>两组回测指标</h2><p class="panel-subtitle">A 组对应左侧选择，B 组对应右侧选择；测试条件见上方</p></div>${verified}</div><div class="table-scroll section-spaced"><table class="comparison-table"><thead><tr><th scope="col">报告指标</th><th scope="col">A 组 · ${esc(first.timeframe)} · 点差 ${esc(first.spread)}</th><th scope="col">B 组 · ${esc(second.timeframe)} · 点差 ${esc(second.spread)}</th></tr></thead><tbody>${rows.map((row,i)=>`<tr ${i===0?'class="emphasized"':''}>${row.map((cell,j)=>`<td class="${j?'mono':''}">${esc(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section><section class="panel full-width"><div class="panel-head"><div><h2>已平仓余额 · 双方案对照</h2><p class="panel-subtitle">A 组初始 ${num(a.initial_deposit)} USD / B 组初始 ${num(b.initial_deposit)} USD；横轴按各组平仓顺序排列</p></div><div class="chart-legend"><span><i style="background:var(--green)"></i>A 组 · ${esc(first.timeframe)} · 点差 ${esc(first.spread)}</span><span><i style="background:var(--blue)"></i>B 组 · ${esc(second.timeframe)} · 点差 ${esc(second.spread)}</span></div></div><div id="compareChart" class="chart-container"></div><div class="chart-caption"><span>来源：所选两份已核验 MT4 报告 · 横轴不代表相同日期</span><span>曲线不包含持仓期间浮动盈亏</span></div></section></div>${notice('可对照不同周期、参数或研究区间；这些差异可能同时影响结果，不能把利润差额全部归因于点差。训练与后续检验不等价，历史表现不保证未来收益。')}`;
+    return `${pageHeading('COMPARE VERIFIED REPORTS','实验对照','左右独立选择两份已归档报告，对照指标与已平仓余额。')}<div class="comparison-selectors">${comparisonSelector(first,'Left')}${comparisonSelector(second,'Right')}</div>${first.id===second.id?notice('当前 A、B 两组选择了同一份报告，指标与曲线相同。'):''}<div class="compare-layout"><section class="panel"><div class="panel-head"><div><h2>两组回测指标</h2><p class="panel-subtitle">A 组对应左侧选择，B 组对应右侧选择；测试条件见上方</p></div>${verified}</div><div class="table-scroll section-spaced"><table class="comparison-table"><thead><tr><th scope="col">报告指标</th><th scope="col">A 组 · ${esc(first.timeframe)} · 点差 ${esc(first.spread)}</th><th scope="col">B 组 · ${esc(second.timeframe)} · 点差 ${esc(second.spread)}</th></tr></thead><tbody>${rows.map((row,i)=>`<tr ${i===0?'class="emphasized"':''}>${row.map((cell,j)=>`<td class="${j?'mono':''}">${esc(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section><section class="panel full-width"><div class="panel-head comparison-chart-head"><div><h2>已平仓余额 · 双方案对照</h2><p class="panel-subtitle">A 组初始 ${num(a.initial_deposit)} USD / B 组初始 ${num(b.initial_deposit)} USD；${state.compareAxis==='date'?'按报告日期对齐，阶梯线仅在平仓时变化':'按各组交易序号排列，短线表示交易较少'}</p></div><div class="segment" role="group" aria-label="选择对照图横轴"><button data-compare-axis="date" aria-pressed="${state.compareAxis==='date'}">按日期</button><button data-compare-axis="trades" aria-pressed="${state.compareAxis==='trades'}">按交易笔数</button></div><div class="chart-legend comparison-chart-legend"><span><i style="background:var(--green)"></i>A 组 · ${esc(first.timeframe)} · 点差 ${esc(first.spread)} · 共 ${first.trades.length} 笔</span><span><i style="background:var(--blue)"></i>B 组 · ${esc(second.timeframe)} · 点差 ${esc(second.spread)} · 共 ${second.trades.length} 笔</span></div></div><div id="compareChart" class="chart-container"></div><div class="chart-caption"><span>${state.compareAxis==='date'?'来源：已核验 MT4 报告 · 余额只延续至各自测试结束边界，区间外不外推':'来源：已核验 MT4 报告 · 第 N 笔交易不代表相同日期'}</span><span>平仓余额，不包含持仓浮动盈亏；报告时区未统一</span></div></section></div>${notice('可对照不同周期、参数或研究区间；这些差异可能同时影响结果，不能把利润差额全部归因于点差。训练与后续检验不等价，历史表现不保证未来收益。')}`;
   }
   function dataPage() {
     const histories = DATA.history || [];
@@ -258,6 +258,66 @@
       const points=values.map((value,index)=>`${index/Math.max(1,values.length-1)*400},${68-(value-lo)/(hi-lo)*59}`);
       svg.innerHTML=`<title>${esc(report.title)} · 已平仓余额简图</title><desc>横轴：已完成交易 0 至 ${report.trades.length} 笔；纵轴：账户余额 ${money(lo)} 至 ${money(hi)} USD。来源：MT4 原生报告。</desc><path d="M0 70H400" stroke="var(--line)" fill="none"/><path d="M${points.join(' L')}" stroke="var(--green)" stroke-width="1.8" fill="none" stroke-linejoin="round"/>`;
     });
+  }
+  function dateComparisonChart(items) {
+    const container=$('compareChart'); if(!container)return;
+    const balance=window.ResearchBalance;
+    let series;
+    try { series=items.map((report,index)=>({...balance.series(report),label:`${index===0?'A':'B'} 组`})); }
+    catch (_) { container.innerHTML=notice('报告日期无法解析，请切换到“按交易笔数”查看；原始交易记录保持不变。');return; }
+    const dark=document.body.classList.contains('dark'), colors=dark?['#a0c9aa','#93abb5']:['#3d8967','#a0b0b6'];
+    const textColor=dark?'#8eaa98':'#99a59e',gridColor=dark?'#2e3b34':'#edf0ee';
+    const W=Math.max(420,Math.min(900,Math.round(container.clientWidth||800))),H=280,pad={left:57,right:32,top:20,bottom:57};
+    const times=balance.timeline(series),start=times[0],end=times.at(-1),duration=Math.max(1,end-start);
+    const values=series.flatMap(item=>item.points.map(point=>point.value)),min=Math.min(...values),max=Math.max(...values),span=Math.max(20,max-min);
+    const step=Math.max(10,Math.ceil(span/4/10)*10),lo=Math.floor((min-span*.09)/step)*step,hi=Math.ceil((max+span*.09)/step)*step;
+    const x=time=>pad.left+(time-start)/duration*(W-pad.left-pad.right),y=value=>pad.top+(hi-value)/(hi-lo)*(H-pad.top-pad.bottom);
+    const NS='http://www.w3.org/2000/svg',svg=document.createElementNS(NS,'svg');
+    svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.classList.add('research-chart');svg.dataset.axis='date';
+    svg.setAttribute('role','slider');svg.setAttribute('tabindex','0');
+    svg.setAttribute('aria-label','已平仓账户余额 USD，横轴报告日期；左右方向键查看日期节点，时间按报告记录，未统一时区');
+    svg.setAttribute('aria-valuemin','0');svg.setAttribute('aria-valuemax',String(times.length-1));svg.setAttribute('aria-valuenow','0');
+    const make=(tag,attributes,text,parent=svg)=>{const node=document.createElementNS(NS,tag);Object.entries(attributes).forEach(([k,v])=>node.setAttribute(k,String(v)));if(text!==undefined)node.textContent=text;parent.append(node);return node;};
+    make('title',{},'已平仓账户余额（USD）· 按报告日期对齐');
+    make('desc',{},`来源：MT4 原生报告。横轴：${balance.format(start)} 至 ${balance.format(end)}，按报告时间坐标对齐，未进行时区换算。阶梯线仅在平仓时变化，最后余额延续至各自测试结束边界，区间外不外推。纵轴为平仓余额 USD，不含持仓浮亏。`);
+    for(let value=lo;value<=hi;value+=step){make('line',{x1:pad.left,x2:W-pad.right,y1:y(value),y2:y(value),stroke:gridColor,'stroke-dasharray':'3 5'});make('text',{x:pad.left-12,y:y(value)+3,'text-anchor':'end',fill:textColor,'font-size':10,'font-family':'monospace'},num(value));}
+    const tickCount=W<650?4:6;
+    const ticks=duration===1?[start]:Array.from({length:tickCount},(_,i)=>start+duration*i/(tickCount-1));
+    ticks.forEach(time=>make('text',{x:x(time),y:H-32,'text-anchor':'middle',fill:textColor,'font-size':9,'font-family':'monospace'},balance.format(time)));
+    make('text',{x:(pad.left+W-pad.right)/2,y:H-9,'text-anchor':'middle',fill:textColor,'font-size':9},'日期（报告时间，未统一时区）');
+    make('text',{x:pad.left,y:10,fill:textColor,'font-size':9},'账户余额（USD）');
+    series.forEach((item,i)=>{
+      make('path',{d:balance.stepPath(item.points,x,y),fill:'none',stroke:colors[i],'stroke-width':2.3,'stroke-linejoin':'round','data-series-report':item.report.id,'data-series-label':item.label,'data-series-start':item.start,'data-series-end':item.end});
+      const last=item.points.at(-1);make('circle',{cx:x(last.time),cy:y(last.value),r:3.4,fill:colors[i],stroke:dark?'#1d2623':'white','stroke-width':2,'data-series-endpoint':item.report.id});
+    });
+    const cursor=make('line',{x1:0,x2:0,y1:pad.top,y2:H-pad.bottom,stroke:textColor,'stroke-dasharray':'3 5',visibility:'hidden'});
+    const circles=series.map((_,i)=>make('circle',{r:4,fill:colors[i],visibility:'hidden'}));
+    container.replaceChildren(svg);
+    const tooltip=document.createElement('div');tooltip.className='chart-tooltip';tooltip.hidden=true;container.append(tooltip);
+    const hint=document.createElement('span');hint.className='chart-keyboard-hint';hint.textContent='← → 查看日期节点 · Home / End 跳转';container.append(hint);
+    let activeIndex=0;
+    function show(index,pointerX){
+      activeIndex=Math.max(0,Math.min(times.length-1,index));const time=times[activeIndex],px=x(time);
+      cursor.setAttribute('x1',px);cursor.setAttribute('x2',px);cursor.setAttribute('visibility','visible');
+      const descriptions=series.map((item,i)=>{
+        const point=balance.at(item,time),circle=circles[i];circle.setAttribute('visibility',point?'visible':'hidden');
+        if(!point)return `${item.label}：${time<item.start?'未开始':'已结束'}（共 ${item.report.trades.length} 笔），所选日期不在测试区间内`;
+        circle.setAttribute('cx',px);circle.setAttribute('cy',y(point.value));
+        return `${item.label}：<strong>$${money(point.value)}</strong> · 已平仓 ${point.count} / ${item.report.trades.length} 笔${point.trade?`<br>最近平仓 ${esc(point.trade.closed)}`:' · 尚无平仓，起始资金'}`;
+      });
+      tooltip.innerHTML=balance.format(time,true)+'（报告时间）<br>'+descriptions.join('<br>');tooltip.hidden=false;
+      const rect=container.getBoundingClientRect(),ideal=pointerX===undefined?px/W*rect.width:pointerX-rect.left;
+      tooltip.style.left=Math.max(6,Math.min(ideal+12,rect.width-tooltip.offsetWidth-8))+'px';tooltip.style.top='30px';
+      svg.setAttribute('aria-valuenow',String(activeIndex));svg.setAttribute('aria-valuetext',balance.format(time,true)+'，'+descriptions.map(text=>text.replace(/<[^>]*>/g,'')).join('；'));
+    }
+    function hide(){cursor.setAttribute('visibility','hidden');circles.forEach(circle=>circle.setAttribute('visibility','hidden'));tooltip.hidden=true;}
+    svg.addEventListener('pointermove',event=>{
+      const rect=svg.getBoundingClientRect(),time=start+Math.max(0,Math.min(1,((event.clientX-rect.left)/rect.width*W-pad.left)/(W-pad.left-pad.right)))*duration;
+      let left=0,right=times.length-1;while(left<right){const mid=Math.floor((left+right)/2);if(times[mid]<time)left=mid+1;else right=mid;}
+      const nearest=left>0&&time-times[left-1]<times[left]-time?left-1:left;show(nearest,event.clientX);
+    });
+    svg.addEventListener('pointerleave',()=>{if(document.activeElement!==svg)hide();});svg.addEventListener('focus',()=>show(activeIndex));svg.addEventListener('blur',hide);
+    svg.addEventListener('keydown',event=>{const next={ArrowRight:activeIndex+1,ArrowLeft:activeIndex-1,Home:0,End:times.length-1}[event.key];if(next!==undefined){event.preventDefault();show(next);}});
   }
   function chart(targetId,items,mode='balance') {
     const container=$(targetId); if(!container) return;
@@ -348,7 +408,7 @@
   }
   function drawAllCharts(){
     if($('overviewChart'))chart('overviewChart',[selected()],state.chartMode);
-    if($('compareChart'))chart('compareChart',comparisonReports());
+    if($('compareChart')){if(state.compareAxis==='date')dateComparisonChart(comparisonReports());else chart('compareChart',comparisonReports());}
     drawSparklines();
   }
   function exportReport(report){
@@ -404,6 +464,8 @@
   document.addEventListener('click',event=>{
     const open=event.target.closest('[data-open-report]');
     if(open){event.preventDefault();openReport(open.dataset.openReport);return;}
+    const axis=event.target.closest('[data-compare-axis]');
+    if(axis){state.compareAxis=axis.dataset.compareAxis;const scroll=window.scrollY;renderRoute();document.querySelector(`[data-compare-axis="${state.compareAxis}"]`)?.focus({preventScroll:true});window.scrollTo(0,scroll);return;}
     const mode=event.target.closest('[data-chart-mode]');
     if(mode){state.chartMode=mode.dataset.chartMode;const scroll=window.scrollY;renderRoute();window.scrollTo(0,scroll);return;}
     const tab=event.target.closest('[data-dialog-tab]');
